@@ -1,0 +1,170 @@
+---
+title: "Assignment 1"
+author: "Group 15: Ivona Bîrlad, Kaiyi Wang, Matteo Rapa"
+date: "9/14/2022"
+output: pdf_document
+fontsize: 11pt
+highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Exercise 1.1 Birthweight
+
+
+```{r load data}
+#load data
+raw_data = read.table(file = "birthweight.txt", header = TRUE)
+#check if the data is correctly loaded
+head(raw_data)
+birthweight = raw_data[, 1]
+```
+### a) Normality Check and $\mu$
+```{r Normality check,  fig.cap="Normality Visualisation", fig.height=4, fig.width=8}
+# histogram
+par(mfrow= c(1,2))
+hist(birthweight, main = "Histogram of Birth Weights", xlab = "Birth weight",  col="gray88", border="gray60")
+# QQ Plot
+qqnorm(birthweight, main = "Q-Q Plot of Birth Weights")
+qqline(birthweight, col = "tomato", lwd = 2)
+```
+
+**Comments**: From data visualization, the data is normally distributed
+
+```{r shapiro test}
+# shapiro test for the normality of the data
+shapiro.test(birthweight)
+```
+
+**Comments**: Reject H0, the data is normally distributed
+
+```{r mu point estimate}
+# the sample mean is used for point estimate for the data
+bw_m = mean(birthweight); bw_m
+```
+**Comments**:
+
+### b) Confidence interval for $\mu$
+
+```{r CI of mu}
+bw_n = length(birthweight)
+bw_s = sd(birthweight)
+# alpha/2 = 0.05, so 1 - alpha = 0.9
+bw_t = qt(0.95, df = bw_n-1)
+c(bw_m - bw_t*bw_s/sqrt(bw_n), bw_m + bw_t*bw_s/sqrt(bw_n))
+
+```
+**Comments**: The 90% CI of $\mu$ is: [2829.20, 2997.38] 
+
+### c) one sample t-test
+```{r one sample t-test}
+# H0
+# H1
+# One sample t-test
+t.test(birthweight, mu = 2800, alt = "g")
+```
+**Comments**: p-value is smaller than 0.05, here we reject H0. 
+
+### d) further discussion
+**Comments**: the R-output of the test from b), indicates that we are 90% confident that the interval from 2829.20 to 2997.38 actually does contain the true value of the population mean $\mu$. This CI is double side. In c), a single side test is conducted for the claim that the mean birthweight is bigger than 2800. To clarify this claim, we compute the alt = 'great' in the t-test. ....
+
+
+## Exercise 1.2 Kinderopvangtoeslag
+### a) estimate for p
+```{r}
+# point estimate for p
+childcare_p = 140 / 200; childcare_p
+```
+**Comments**: the point estimate for p is 0.7
+
+### b) CI of p
+```{r}
+# calculate q
+childcare_q = 1 - childcare_p
+# sample size
+childcare_n = 200
+# calculate z alpha/2. 
+# for 99% CI, we have alpha = 0.01
+childcare_z = qnorm(1 - 0.01/2)
+# calculate the 99% CI of childcare_p
+c(childcare_p - childcare_z * sqrt(childcare_p * childcare_q / childcare_n),
+  childcare_p + childcare_z * sqrt(childcare_p * childcare_q / childcare_n))
+```
+**Comments**: The 99% CI of p is: [0.617, 0.783] 
+
+
+### b) proportion test
+```{r options(digits = 5)  }
+bi_0.9 = binom.test(140, 200, p = 0.75,conf.level = 0.9); bi_0.9[3]
+bi_0.95 = binom.test(140, 200, p = 0.75,conf.level = 0.95); bi_0.95[3]
+bi_0.99 = binom.test(140, 200, p = 0.75,conf.level = 0.99); bi_0.99[3]
+bi_0.8 = binom.test(140, 200, p = 0.75,conf.level = 0.8); bi_0.8[3]
+```
+
+Table 1 XXXX
+$\alpha$ | 0.8 | 0.9 | 0.95 | 0.90 
+------ | -------------------- | -----------------------  | -----------------------| ----------------------- 
+P-value | `r  0.103` | `r 0.103`  | `r 0.103` | `r 0.103`
+
+**Comments**: p-value doesn't change by different CI. Explanation?
+
+
+
+## Exercise 1.3 Weather
+```{r}
+#load data
+raw_data_weather = read.table(file = "weather.txt", header = TRUE)
+#check if the data is correctly loaded
+head(raw_data_weather)
+# assign variables
+humidity = raw_data_weather$humidity
+temperature = raw_data_weather$temperature
+```
+
+
+```{r}
+summary(humidity)
+summary(temperature)
+```
+
+
+
+```{r,, fig.height=4, fig.width=8}
+par(mfrow= c(1,2))
+boxplot(humidity, main = "humidity", xlab = "humidity", ylab = "Percentage", col="dodgerblue")
+boxplot(temperature, main = "temperature", xlab = "temperature", ylab = "fahrenheit", col="tomato")
+```
+
+
+
+
+```{r, fig.cap="Normality Visualisation", fig.height=4, fig.width=8}
+# histogram
+par(mfrow= c(1,2))
+hist(humidity, main = "Histogram of humidity", xlab = "humidity",  col="gray88", border="gray60")
+# QQ Plot
+qqnorm(humidity, main = "Q-Q Plot of humidity")
+qqline(humidity, col = "tomato", lwd = 2)
+```
+```{r shapiro test2}
+# shapiro test for the normality of the data
+shapiro.test(humidity)
+```
+
+
+
+```{r, fig.cap="Normality Visualisation", fig.height=4, fig.width=8}
+# histogram
+par(mfrow= c(1,2))
+hist(temperature, main = "Histogram of temperature", xlab = "temperature",  col="gray88", border="gray60")
+# QQ Plot
+qqnorm(temperature, main = "Q-Q Plot of temperature")
+qqline(temperature, col = "tomato", lwd = 2)
+```
+```{r shapiro test3}
+# shapiro test for the normality of the data
+shapiro.test(temperature)
+```
