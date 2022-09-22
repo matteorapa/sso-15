@@ -16,7 +16,6 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
-
 ## Exercise 1.1 Birthweight
 
 ```{r load data, include=FALSE}
@@ -53,10 +52,10 @@ To confirm this, a Shapiro test has been conducted as follows.
 shapiro=shapiro.test(birthweight) 
 ```
 
-As the p-value is `r round(shapiro[[2]],3)` and thus above $\alpha$ = 0.05, $H_0$ (the data is normally distributed) is accepted A justification has been made that the data is normally distributed both graphically and statistically.
+As the p-value is `r round(shapiro[[2]],3)` and thus above $\alpha$ = 0.05, $H_0$ (the data is normally distributed) is accepted. A justification has been made that the data is normally distributed both graphically and statistically.
 
-```{r mu point estimate}
-bw_mean = mean(birthweight); bw_mean 
+```{r mu point estimate, }
+bw_mean = mean(birthweight); bw_mean
 ```
 **Comments**: The point estimation for $\mu$ is 2913.293.
 
@@ -74,6 +73,10 @@ c(bw_mean - bw_t*bw_sd/sqrt(bw_number),
 **Comments**: The 90% confidence interval (CI) of $\mu$ is: [2829.202, 2997.384]. Thus, it can be said with 90% confidence that the interval [2829.202, 2997.384] contains the actual population birth weight $\mu$.
 
 $\ $
+
+```{r, include=FALSE}
+options("digits" = 3)
+```
 
 **c)** We construct the following hypotheses:
 
@@ -265,14 +268,23 @@ round(c(tem_mean - tem_t*tem_sd/sqrt(tem_number),
 **Comments**: the R-output of the test from b), indicates that we are 90% confident that the interval from 47.487 to 57.963 actually does contain the true value of the temperature mean $\mu$. 
 
 
-### d)
+**d)** We derive the minimum sample size for the mean humidity to fall within the 95% confidence interval by using the following formula: 
+
+
+$$
+n \ge \frac{t_{\alpha/2}^{2}s^{2}}{E^2}
+$$
+
+Given that the confidence interval has at most length 2%, this means that 2E = 0.02 and, thus, the margin of error is E = 0.01. 
+
 
 ```{r}
 hum_mean = mean(humidity) # sample mean
 hum_number = length(humidity) # sample size
 hum_sd = sd(humidity) # sample sd
 hum_t = qt(0.975, df = hum_number-1) # calculate t value
-round(hum_t^2 *  hum_sd^2 / (1^2) , 3)# calculate minimum sample size
+E = 0.01*100 #Ensuring the maximum margin of error is in percentage form 
+round(hum_t^2 *  hum_sd^2 / (E^2) , 3)# calculate minimum sample size
 ```
 
 **Comments**: According to the calculation, we may have to include 146 humidity 
@@ -282,12 +294,12 @@ samples that the CI has at most length of 2%, with 95% confidence.
 
 
 ## Exercise 1.4 Jane Austen
-**a)** 
+**a)** We are given the following data: 
 ```{r}
 austen = read.table(file = "austen.txt", header = TRUE); austen # display data
 ```
 
-**Comments**: Yes we could use a contingency table test homogeneity in this exercise. 
+**Comments**: For this dataset, we could use a contingency table test homogeneity since: 
 
 * The data is presented in a 6 * 4 table, and no missing data has been found.
 * In order to conduct quantitative studies on literary styles, the distribution
@@ -298,25 +310,26 @@ austen = read.table(file = "austen.txt", header = TRUE); austen # display data
     indicates that at least 80% of the Eij ’s are at least 5, which fulfils the 
     test condition.
     
-**b)** 
+**b)** We check for the consistency of Austen's writing using the Chi Square test:  
 ```{r}
 # The first three columns are Jane Austen's novels
 chisq.test(austen[,1:3])[3]
 ```
-**c)** 
 **Comments**: The $H_0$ cannot be rejected at 95% significant level (p = 0.161). The distributions of the selected word counts over rows are the same among different works written by Jane Austen. This may indicate that Austen herself was consistent in her different novels.
+
+**c)** We use a $Chi^{2}$ test over the entire dataset to verify if the writing style of Austen's admirer was consistent with her own: 
 
 ```{r}
 # a chi-sq test for all columns including Jane Austin and the admirer's novels
 chisq.test(austen)[3]
 ```
 
-**d)** 
 **Comments**: The $H_0$ still cannot be rejected, as p-value > 0.05. The distributions of the selected words over rows are equal from different work written by Jane Austen and her admirer. This may indicate that the admirer has successfully imitated Austen's writing style.
 
 
+
 ## Appendix The Supplementary R Codes 
-### 1.1
+#### 1.1 
 ```{r load data appendix, results = "hide"}
 #load data
 raw_data_birthweight = read.table(file = "birthweight.txt", header = TRUE)
