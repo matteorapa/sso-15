@@ -252,6 +252,11 @@ in a saddle curve shape. From the Q-Q plot, the theoretical quantiles lay on an 
 
 $\ $
 
+```{r, include=FALSE}
+options("digits" = 5)
+```
+
+
 **c)** We compute the give a 90% confidence interval for the mean temperature:
 
 ```{r}
@@ -276,10 +281,6 @@ n \ge \frac{t_{\alpha/2}^{2}s^{2}}{E^2}
 $$
 
 Given that the confidence interval has at most length 2%, this means that 2E = 0.02 and, thus, the margin of error is E = 0.01. 
-
-```{r, include=FALSE}
-options("digits" = 5)
-```
 
 
 ```{r}
@@ -338,7 +339,7 @@ chisq.test(austen)[3]
 
 ## Appendix The Supplementary R Codes 
 #### 1.1 
-```{r load data appendix, results = "hide"}
+```{r load data appendix, results = "hide", eval=FALSE}
 #load data
 raw_data_birthweight = read.table(file = "birthweight.txt", header = TRUE)
 #check if the data is correctly loaded
@@ -360,7 +361,7 @@ qqline(birthweight, col = "tomato", lwd = 2)
 
 
 ### 1.2
-```{r Binomial tests appendix, results = "hide"}
+```{r Binomial tests appendix, results = "hide", eval=FALSE}
 # binomial tests of different significance level
 bi_0.9 = binom.test(140, 200, p = 0.75,conf.level = 0.9); bi_0.9[3] 
 bi_0.95 = binom.test(140, 200, p = 0.75,conf.level = 0.95); bi_0.95[3]
