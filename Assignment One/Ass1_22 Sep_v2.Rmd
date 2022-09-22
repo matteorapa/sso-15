@@ -277,6 +277,10 @@ $$
 
 Given that the confidence interval has at most length 2%, this means that 2E = 0.02 and, thus, the margin of error is E = 0.01. 
 
+```{r, include=FALSE}
+options("digits" = 5)
+```
+
 
 ```{r}
 hum_mean = mean(humidity) # sample mean
@@ -291,6 +295,10 @@ round(hum_t^2 *  hum_sd^2 / (E^2) , 3)# calculate minimum sample size
 samples that the CI has at most length of 2%, with 95% confidence. 
 
 *Note for the calculation: the measurement of humidity is "percentage %". To satisfy the CI length is 2%, the unit in calculation should be consistent with the original data.*
+
+```{r, include=FALSE}
+options("digits" = 3)
+```
 
 
 ## Exercise 1.4 Jane Austen
