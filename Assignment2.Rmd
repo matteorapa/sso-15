@@ -1,0 +1,217 @@
+---
+title: "Assignment 2"
+author: "Group 15: Ivona Bîrlad, Kaiyi Wang, Matteo Rapa"
+date: "5/10/2022"
+output: pdf_document
+fontsize: 11pt
+highlight: tango
+---
+
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## 2.1 Scholastic Aptitude Test
+### 2.1 Test test 
+
+```{r load data, include=FALSE}
+#load data
+sat = read.table(file = "sat.txt", header = TRUE)
+#check if the data is correctly loaded
+head(sat)
+```
+
+### 2.1 a) Step-down method
+
+```{r}
+# summary(lm(total~ expend + ratio + salary + takers,data=sat)) #R2adj = 0.809
+summary(lm(total~ ratio + salary + takers,data=sat)) #R2adj=0.8124
+# summary(lm(total~ salary + takers,data=sat)) #Radj = 0.7973
+# summary(lm(total~ takers,data=sat)) #Radj = 0.7825
+```
+The best model using the step down method is given by ratio + salary + takers.
+
+
+### 2.1 a) Step-up method
+
+```{r}
+# summary(lm(total~ expend,data=sat)) #0.127
+# summary(lm(total~ ratio,data=sat)) #0.01409
+# summary(lm(total~ salary,data=sat)) #0.1767
+summary(lm(total~ takers,data=sat)) #0.7825
+
+```
+
+```{r}
+# summary(lm(total~ takers + salary,data=sat)) #0.7973
+# summary(lm(total~ takers + ratio,data=sat)) #0.7906
+summary(lm(total~ takers + expend,data=sat)) #0.8118 - add
+
+# summary(lm(total~ takers + expend + ratio,data=sat)) #0.8112 - don't add
+# summary(lm(total~ takers + expend + salary,data=sat)) #0.8078 - don't add
+
+```
+
+The best model using the step up method is given by takers + expend. This model is preferred to the previous one since it yields a very similar adjusted R2 value while employing fewr variables.
+
+
+### 2.1 b) Step down
+
+```{r}
+sat$takers2=(sat$takers)^2
+# summary(lm(total~ expend + ratio + salary + takers +takers2,data=sat)) #R2adj = 0.8761
+# summary(lm(total~ expend + ratio + takers +takers2,data=sat)) #R2adj = 0.8788
+summary(lm(total~ expend + takers +takers2,data=sat)) #R2adj = 0.8785
+# summary(lm(total~ takers +takers2,data=sat)) #R2adj = 0.8678
+
+```
+### 2.1 b) Step up 
+
+
+
+```{r}
+# summary(lm(total~ takers2,data=sat)) #R2adj = 0.6507
+summary(lm(total~ takers +takers2,data=sat)) #R2adj = 0.8678
+satlm = lm(total~ takers + takers2,data=sat)
+```
+The two methods yield the same result this time. The preferred model in this case is takers + takers2. 
+
+
+### c) Preferred model
+
+Reasoning: The preferred model to predict total consists of the independent variables takers + takers2, in equation form: 
+
+$$
+total = \beta_{0} + \beta_{1} takers + \beta_{2} takers^{2} 
+$$
+
+One argument for choosing this model is that it produces the highest adjusted $R^{2}$ value, namely, 0.868 and thus the model is able to explain almost 87% of the variation in the data. Furthermore, compared with models that achieve higher $R^{2}$ values (total~ expend + ratio + takers +takers2), this model only contains two independent variables and thus the most important predictors can be pinpointed. When looking at other well-performing models with few variables, the increase in the coefficient of determination is a measurable compared to the model including only takers and expend as regressors (adjusted $R^{2} = 0.812$). 
+
+
+### d) Estimation
+
+```{r}
+#for a state with expend=5, ratio=20, salary=36.000,takers=25
+newdata = data.frame(expend = 5, ratio=20, salary=36.000, takers=25, takers2 = 25^2)
+PI = predict(satlm, newdata = newdata, interval="predict")
+CI = predict(satlm, newdata = newdata, interval="confidence")
+print("Prediction Interval")
+PI
+print("Confidence Interval")
+CI
+```
+The SAT total score point estimate for the state described by the new data is `r round(PI[[1]], 3)`. The 95% confidence interval is [`r round(CI[[2]], 3)`, `r round(CI[[3]], 3)`] and the prediction interval is [`r round(PI[[2]], 3)`, `r round(PI[[3]], 3)`]. 
+
+
+## 2.2 Trees
+### 2.2 a) ANOVA
+
+```{r}
+trees=read.table(file="treeVolume.txt",header=T)
+trees$type=as.factor(trees$type)
+treeslm=lm(volume~type,data=trees) 
+anova(treeslm) # p-value large, cannot reject H0
+summary(treeslm) 
+# boxplot(volume~type,main="tree types",data=trees)
+
+```
+There is no significant difference of means in the volumes of the two tree types and the factor of tree type is not significant to the model since the p-value is above 0.05. Estimate of mean volume of a beech tree is 30.171 and oak: 20.171 + 5.079 = `r sum(20.171,5.079)`. So, indeed the oak is on average more voluminous than the beech. 
+
+
+### 2.2 b) ANCOVA
+
+```{r}
+#does the tree type influence the volume, now including diameter and height (but no interactions)
+#How does tree type influence volume?
+
+treelm=lm(volume~type+height+diameter, data = trees)
+anova(treelm)
+summary(treelm)
+
+#How does diameter influence volume? 
+treelm=lm(volume~diameter + type, data = trees)
+anova(treelm)
+summary(treelm)
+
+contrasts(trees$type)=contr.sum 
+treeaov=lm(volume~ type + diameter,data=trees) 
+summary(treeaov)
+```
+*Q:* Does the tree type influence the volume, now including diameter and height (but no interactions)?
+
+*A:* Yes, when considering diameter and height, tree type becomes a significant factor in predicting volume as well. Both height and diameter are significant explanatory variables in relation to volume. 
+
+*Q:* What are the estimated volumes for the two tree types with average diameter and height? (Hint: use function predict.) 
+
+```{r}
+newdataoak = data.frame(diameter = mean(trees$diameter), height=mean(trees$height), type="oak")
+newdatabeech = data.frame(diameter = mean(trees$diameter), height=mean(trees$height), type="beech")
+estimoak = predict(treelm, newdata = newdataoak)
+estimbeech = predict(treelm, newdata = newdatabeech)
+
+print(paste("Estimated volume of oak: ",estimoak, "Esimated voulume of beech: ", estimbeech))
+```
+
+
+*A:* The estimated volumes for the two tree types with average diameter and height are: oak - 31.630 and beech - 33.441, which is expected since the regression coefficient indicates that an oak tree's volume is estimated to be lower by 1.811 compared to a beech tree, ceteris paribus. 
+
+*Q:* How does diameter influence volume? Graphically (or propose and perform a relevant test) investigate whether this dependence is similar for both tree types. 
+
+```{r}
+
+oak = trees[trees$type=="oak",] #oak subset
+beech = trees[trees$type=="beech",] #beech subset 
+
+par(mfrow=c(2,2))
+# plot(oak$diameter,oak$volume)
+# plot(beech$diameter,beech$volume)
+# plot(diameter,volume,col=factor(type,labels=c("blue","red")))
+p1 = ggplot(beech,aes(x=volume,y=diameter))+geom_point() 
+p1 = p1 +ggtitle("Volume~Diameter effect for beech trees")
+p2 = ggplot(oak,aes(x=volume,y=diameter))+geom_point() 
+p2 = p2 + ggtitle("Volume~Diameter effect for oak trees")
+p3 = ggplot(trees,aes(x=volume,y=diameter,col=type))+geom_point()
+p1
+p2
+p3
+
+```
+
+
+*A:* Diameter has a significant influence in predicting volume.An increase in the diameter of the tree appears to correspond to an increase in the volume of that tree. From the scatterplots it can be observed that the effect is present for both beech trees and oak trees. 
+
+### 2.2 c) Proposed transformation 
+
+
+
+```{r}
+treelm=lm(volume~height+diameter+type, data = trees)
+# summary(lm(volume~type+height+diameter, data = trees))
+# summary(lm(volume~height+diameter, data = trees))
+# summary(lm(volume~height+diameter+height*diameter, data = trees))
+# summary(lm(volume~height +diameter, data = trees))
+# summary(lm(volume~height+diameter, data = trees))
+
+##Check linearity of relation between DV and IVs
+attach(trees)
+par(mfrow=c(2,2))
+plot(diameter, volume)
+plot(height, volume)
+plot(diameter, height)
+boxplot(volume~type)
+
+trees$dim2 = trees$diameter^2
+
+summary(lm(volume~height+dim2, data = trees)) #Adj R^2 = 0.966
+
+
+
+```
+
+The proposed transformation follows from the scatter plot of diameter~volume. This plot shows high correlation between the two variables and follows a growth similar to that of polynomial function $x^{2}$. The model appears to improve when including the square of diameter as an estimator, the corresponding adjusted $R^{2}$ value becoming 0.966. 
